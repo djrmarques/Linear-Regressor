@@ -13,9 +13,20 @@ class LinearRegression:
 
     def predict(self, X):
         pass
-    
+
     def plot(self):
         pass
 
 if (__name__ == "__main__"):
-    print("zema")
+
+    import pandas as pd
+
+    datapath = "../islr/datasets/Advertising.csv"
+    df = pd.read_csv(datapath, index_col=0)
+    print(df.head())
+
+    X = df.drop("sales", axis=1)
+    y = df["sales"]
+
+    lr = LinearRegression()
+    lr.fit(X, y)
