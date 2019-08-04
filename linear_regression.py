@@ -4,30 +4,39 @@
 import numpy as np
 
 class LinearRegression:
-    """ Linear Regression. This is class is not meant to be used in production, it was just designed as a learning tool. """
+    """
+    Linear Regression.  This is class is not meant to be used in production, it
+    was just designed as a learning tool.
+    """
+
+    def __init__(self):
+        self.coeficients = None
 
     def fit(self, X, y):
         """ Determined the coeficients for the regression """
         pass
 
 
-    def _single_fit(self, X, y):
-        """ This method fits a simple linear regression (Only one indepent variable)"""
+    def _single_fit(self, X_train, y):
+        """ This method fits a simple linear regression, and gets the parameters (Only one indepent variable) """
 
-        self._inputs_check(X, y)
+        self._inputs_check(X_train, y)
 
         # Assert that the training set only has one variable
-        n_independent = X.ndim
+        n_independent = X_train.ndim
         assert n_independent == 1, f"The number of indepent variables is {n_independent} and should be just one."
 
-        X_mean = X.mean()
+        X_train_mean = X.mean()
         y_mean = y.mean()
 
-        beta1 = ((X - X_mean)*(y - y_mean)).sum()/(np.sum(np.square(X-X_mean)))
-        beta0 = y_mean - beta1*X_mean
+        beta1 = ((X_train - X_train_mean)*(y - y_mean)).sum()/(np.sum(np.square(X-X_train_mean)))
+        beta0 = y_mean - beta1*X_train_mean
 
-        print(beta1, beta0)
+        # Save the coeficients
+        self.coeficients = np.array([beta0, beta1])
 
+    def score(self, X_test):
+        """ Scores the obtained on the provided test set. Uses R squared."""
 
     def predict(self, X):
         """ Makes predictions on a test data set"""
