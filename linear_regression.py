@@ -23,10 +23,10 @@ class LinearRegression:
         X_mean = X.mean()
         y_mean = y.mean()
 
-        beta1 = ((X - X_mean)*(y - y_mean)).sum()/(np.sum(X-X_mean)**2)
+        beta1 = ((X - X_mean)*(y - y_mean)).sum()/(np.sum(np.square(X-X_mean)))
         beta0 = y_mean - beta1*X_mean
 
-        print(beta0, beta1)
+        print(beta1, beta0)
 
 
     def predict(self, X):
