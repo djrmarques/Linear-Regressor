@@ -1,0 +1,18 @@
+#+TITLE: Linear Regression
+
+* Linear Regression
+This project was create in order to folow along with the ISLR book. This is not
+meant to be used in in production as it will likely be way slower than other
+much better libraries (Sklearn, etc..)
+
+* Features
+
+*  Tasks
+- [X] The fit method
+  - [X] Calculate the coeficients of regression
+- [X] The score method (calculate the r2 square)
+- [X] Check the data before the fit method (No nans and so on)
+- [ ] Visualizing the data
+  - Make a scatter matrix of all the variables with the curve and the r2 score
+- [ ] Feature selection
+  - Select the best festures for the regression
