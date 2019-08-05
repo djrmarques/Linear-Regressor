@@ -21,41 +21,46 @@ class LinearRegression:
         self.rss = None
         self.tss = None
 
-        self.label = None
+        self.y = None
+        self.X_train = None
 
 
-    def fit(self, X, y):
+    def fit(self, X_train, y):
         """ Determined the coeficients for the regression """
-        pass
 
-    def _single_fit(self, X_train, y):
-        """ This method fits a simple linear regression, and gets the parameters (Only one indepent variable) """
-
+        # Check the input formats
         self._inputs_check(X_train, y)
 
-        self.y = y  # TODO: Change this later
-        self.X = X  # TODO: Change this later
+        # Save the label and the training set
+        self.y = y.reshape(1, y.shape[0])
+        self.X_train = X_train.reshape(-1, X_train.shape[0])
 
-        # Assert that the training set only has one variable
-        n_independent = X_train.ndim
-        assert n_independent == 1, f"The number of indepent variables is {n_independent} and should be just one."
+        # Concatenate values of 1 in the array
+        self.X_train = np.concatenate((self.X_train, np.ones((1, self.X_train.shape[1]))), axis=0)
 
-        X_train_mean = X.mean()
-        y_mean = y.mean()
+        XT_X = np.matmul(self.X_train, self.X_train.T)
 
-        beta1 = ((X_train - X_train_mean)*(y - y_mean)).sum()/(np.sum(np.square(X-X_train_mean)))
-        beta0 = y_mean - beta1*X_train_mean
+        # This happens in a simple linear regression
+        if self.X_train.shape[1] == 1:
+            inv_XT_X = np.array(1/XT_X).reshape(1, 1)
+        else:
+            inv_XT_X = np.linalg.inv(XT_X)
+
+        invXTX_XT = np.matmul(inv_XT_X, self.X_train)
+        coefs = np.matmul(invXTX_XT, self.y.T).reshape(1, -1)
 
         # Save the coeficients
-        self.coeficients = np.array([beta1, beta0])
+        self.coefs = coefs
         self._polyfit = np.poly1d(self.coeficients)
 
-    def scatter_matrix(self):
+    def scatter_matrix(self, variable_names):
         """ Plots the scatter matrix with the corresponding linear fit line """
+
+        assert self.coeficients is not None, "Run the fit method first."
 
         plt.figure(figsize=(10, 10))
 
-        plt.scatter(self.X, self.y, alpha=0.5)
+        plt.scatter(self.X_train, self.y, alpha=0.5)
         plt.plot(tuple(map(self._polyfit, range(0, self.X.max().astype(int)))), color="red")
         plt.show()
 
@@ -77,15 +82,15 @@ class LinearRegression:
         self.r2 = 1 - self.rss/self.tss
 
     @staticmethod
-    def _inputs_check(X, y):
+    def _inputs_check(X_train, y):
         """ Checks if the provided inputs are in the right format """
 
         # Assert that both X, y are ndarrays
-        assert type(X) == np.ndarray, "Please pass X as a np.ndarray"
+        assert type(X_train) == np.ndarray, "Please pass X as a np.ndarray"
         assert type(y) == np.ndarray, "Please pass y as a np.ndarray"
 
         # Check that there are no nans
-        assert np.isnan(X).sum() == 0, "There are missing values in X"
+        assert np.isnan(X_train).sum() == 0, "There are missing values in X"
         assert np.isnan(y).sum() == 0, "There are missing values in y"
 
         # Check the shape of the inputs
@@ -104,6 +109,4 @@ if (__name__ == "__main__"):
     y = df["sales"].values
 
     lr = LinearRegression()
-    lr._single_fit(X, y)
-    lr.score(X)
-    lr.scatter_matrix()
+    lr.fit(X, y)
