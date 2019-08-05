@@ -47,11 +47,11 @@ class LinearRegression:
             inv_XT_X = np.linalg.inv(XT_X)
 
         invXTX_XT = np.matmul(inv_XT_X, self.X_train)
-        coefs = np.matmul(invXTX_XT, self.y.T).reshape(1, -1)
+        coefs = np.matmul(invXTX_XT, self.y.T).flatten()
 
         # Save the coeficients
         self.coefs = coefs
-        self._polyfit = np.poly1d(self.coeficients)
+        self._polyfit = np.poly1d(coefs)
 
     def scatter_matrix(self, variable_names):
         """ Plots the scatter matrix with the corresponding linear fit line """
@@ -68,7 +68,7 @@ class LinearRegression:
     def score(self, X_test):
         """ Scores the obtained on the provided test set. Uses R squared."""
 
-        assert self.coeficients is not None, "Run the fit method first."
+        assert self.coefs is not None, "Run the fit method first."
 
         # Convert array to 2D, if it is only 1D.
         if X_test.ndim > 1:
@@ -110,3 +110,5 @@ if (__name__ == "__main__"):
 
     lr = LinearRegression()
     lr.fit(X, y)
+    lr.score(X)
+    print(lr.r2)
