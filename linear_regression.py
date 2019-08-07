@@ -3,7 +3,7 @@
 # This module was written while following the ISLR book
 
 import numpy as np
-import matplotlib.pyplot as plt
+import statsmodels.api as sm
 
 
 class LinearRegression:
@@ -32,38 +32,30 @@ class LinearRegression:
         self._inputs_check(X_train, y)
 
         # Save the label and the training set
-        self.y = y.reshape(1, y.shape[0])
-        self.X_train = X_train.reshape(-1, X_train.shape[0])
+        self.y = y
+        self.X_train = X_train
+
+        # Reshape the variables
+        y = y.reshape(1, y.shape[0])
+        X_train = X_train.reshape(-1, X_train.shape[0])
 
         # Concatenate values of 1 in the array
-        self.X_train = np.concatenate((self.X_train, np.ones((1, self.X_train.shape[1]))), axis=0)
+        X_train = np.concatenate((X_train, np.ones((1, X_train.shape[1]))), axis=0)
 
-        XT_X = np.matmul(self.X_train, self.X_train.T)
+        XT_X = np.matmul(X_train, X_train.T)
 
         # This happens in a simple linear regression
-        if self.X_train.shape[1] == 1:
+        if X_train.shape[1] == 1:
             inv_XT_X = np.array(1/XT_X).reshape(1, 1)
         else:
             inv_XT_X = np.linalg.inv(XT_X)
 
-        invXTX_XT = np.matmul(inv_XT_X, self.X_train)
-        coefs = np.matmul(invXTX_XT, self.y.T).flatten()
+        invXTX_XT = np.matmul(inv_XT_X, X_train)
+        coefs = np.matmul(invXTX_XT, y.T).flatten()
 
         # Save the coeficients
         self.coefs = coefs
         self._polyfit = np.poly1d(coefs)
-
-    def scatter_matrix(self, variable_names):
-        """ Plots the scatter matrix with the corresponding linear fit line """
-
-        assert self.coeficients is not None, "Run the fit method first."
-
-        plt.figure(figsize=(10, 10))
-
-        plt.scatter(self.X_train, self.y, alpha=0.5)
-        plt.plot(tuple(map(self._polyfit, range(0, self.X.max().astype(int)))), color="red")
-        plt.show()
-
 
     def score(self, X_test):
         """ Scores the obtained on the provided test set. Uses R squared."""
@@ -80,6 +72,17 @@ class LinearRegression:
         self.rss = np.square(self.y - self.prediction).sum()
         self.tss = np.square(self.y - self.y.mean()).sum()
         self.r2 = 1 - self.rss/self.tss
+
+    def feature_selection(self):
+        pass
+
+    def regression_analysis(self):
+        """ Uses statsmodels to print the analysis of the regression variables"""
+
+        X = sm.add_constant(self.X_train)
+        mod = sm.OLS(self.y, X)
+        res = mod.fit()
+        print(res.summary())
 
     @staticmethod
     def _inputs_check(X_train, y):
@@ -105,10 +108,9 @@ if (__name__ == "__main__"):
     datapath = "../islr/datasets/Advertising.csv"
     df = pd.read_csv(datapath, index_col=0)
 
-    X = df["TV"].values
+    X = df.drop("sales", axis=1).values
     y = df["sales"].values
 
     lr = LinearRegression()
     lr.fit(X, y)
-    lr.score(X)
-    print(lr.r2)
+    lr.regression_analysis()
