@@ -17,9 +17,8 @@ class LinearRegression:
         X_train -> n_samples * n_features
         y -> n_samples 
         """
-        self.coeficients = None
+
         self.r2 = None
-        self._polyfit = None
         self.prediction = None
 
         self.rss = None
@@ -34,7 +33,7 @@ class LinearRegression:
         """ Determined the coeficients for the regression """
 
         # Concatenate values of 1 in the array
-        X_train = np.concatenate((self.X_train, np.ones((1, self.X_train.shape[1]))), axis=0)
+        X_train = np.concatenate((np.ones((1, self.X_train.shape[1])), self.X_train), axis=0)
 
         XT_X = np.matmul(X_train, X_train.T)
 
@@ -71,7 +70,6 @@ class LinearRegression:
         """ Uses statsmodels to print the analysis of the regression variables"""
 
         X = sm.add_constant(self.X_train.T)
-        print(X.shape, self.y.shape)
         mod = sm.OLS(self.y.T, X)
         res = mod.fit()
         print(res.summary())
@@ -113,4 +111,3 @@ if (__name__ == "__main__"):
 
     lr = LinearRegression(X, y)
     lr.fit()
-    lr.regression_analysis()
