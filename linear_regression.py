@@ -12,7 +12,11 @@ class LinearRegression:
     was just designed as a learning tool.
     """
 
-    def __init__(self):
+    def __init__(self, X_train, y ):
+        """
+        X_train -> n_samples * n_features
+        y -> n_samples
+        """
         self.coeficients = None
         self.r2 = None
         self._polyfit = None
@@ -21,26 +25,16 @@ class LinearRegression:
         self.rss = None
         self.tss = None
 
-        self.y = None
-        self.X_train = None
-
-
-    def fit(self, X_train, y):
-        """ Determined the coeficients for the regression """
-
-        # Check the input formats
-        self._inputs_check(X_train, y)
-
         # Save the label and the training set
+        self._inputs_check(X_train, y)
         self.y = y
         self.X_train = X_train
 
-        # Reshape the variables
-        y = y.reshape(1, y.shape[0])
-        X_train = X_train.reshape(-1, X_train.shape[0])
+    def fit(self):
+        """ Determined the coeficients for the regression """
 
         # Concatenate values of 1 in the array
-        X_train = np.concatenate((X_train, np.ones((1, X_train.shape[1]))), axis=0)
+        X_train = np.concatenate((self.X_train, np.ones((1, self.X_train.shape[1]))), axis=0)
 
         XT_X = np.matmul(X_train, X_train.T)
 
@@ -51,16 +45,18 @@ class LinearRegression:
             inv_XT_X = np.linalg.inv(XT_X)
 
         invXTX_XT = np.matmul(inv_XT_X, X_train)
-        coefs = np.matmul(invXTX_XT, y.T).flatten()
 
         # Save the coeficients
+        coefs = np.matmul(invXTX_XT, self.y.T).flatten()
         self.coefs = coefs
         self._polyfit = np.poly1d(coefs)
 
     def score(self, X_test):
         """ Scores the obtained on the provided test set. Uses R squared."""
 
+        # Initial assertions
         assert self.coefs is not None, "Run the fit method first."
+        assert X_test.shape == self.X_train.shape, "Method do not have the same shape"
 
         # Convert array to 2D, if it is only 1D.
         if X_test.ndim > 1:
@@ -73,9 +69,6 @@ class LinearRegression:
         self.tss = np.square(self.y - self.y.mean()).sum()
         self.r2 = 1 - self.rss/self.tss
 
-    def feature_selection(self):
-        pass
-
     def regression_analysis(self):
         """ Uses statsmodels to print the analysis of the regression variables"""
 
@@ -83,6 +76,13 @@ class LinearRegression:
         mod = sm.OLS(self.y, X)
         res = mod.fit()
         print(res.summary())
+
+    def select_features(self):
+        """ Performs feature selection """
+
+        n_features = 0
+        total_features = 0
+        best_r2 = 0
 
     @staticmethod
     def _inputs_check(X_train, y):
@@ -97,8 +97,8 @@ class LinearRegression:
         assert np.isnan(y).sum() == 0, "There are missing values in y"
 
         # Check the shape of the inputs
-        assert y.ndim == 1, f"y array should have dimention one, not {y.dim}"
-        assert X.shape[0] == y.shape[0], "The dependent and independt variables do not have the same shape."
+        assert y.shape[0] == 1, f"y array should have dimention one, not {y.dim}"
+        assert X.shape[1] == y.shape[1], "The dependent and independt variables do not have the same shape."
 
 # The parentehsis are just because of EMACS
 if (__name__ == "__main__"):
@@ -108,9 +108,13 @@ if (__name__ == "__main__"):
     datapath = "../islr/datasets/Advertising.csv"
     df = pd.read_csv(datapath, index_col=0)
 
-    X = df.drop("sales", axis=1).values
+    X = df.drop("sales", axis=1).values.T
     y = df["sales"].values
+    y = y.reshape(1, y.shape[0])
 
-    lr = LinearRegression()
-    lr.fit(X, y)
-    lr.regression_analysis()
+
+    lr = LinearRegression(X, y)
+    lr.fit()
+    # print(lr.coefs)
+    # lr.score(X)
+    # print(lr.r2)

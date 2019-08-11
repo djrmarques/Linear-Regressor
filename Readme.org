@@ -10,6 +10,7 @@ much better libraries (Sklearn, etc..)
   - [X] Calculate the coeficients of regression
 - [X] The score method (calculate the r2 square)
 - [X] Check the data before the fit method (No nans and so on)
-- [ ] Implement a method based on the statsmodel library.
+- [X] Implement a method based on the statsmodel library.
 - [ ] Feature selection
-  - Select the best festures for the regression
+   Implement Forward Feature Selection by adding faetures one by one and saving
+  the one that would give the highest score.
