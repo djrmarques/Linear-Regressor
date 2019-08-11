@@ -3,7 +3,10 @@
 * Linear Regression
 This project was created as I followed along with ISLR chapter 2. This is not
 meant to be used in in production as it will likely be way slower than other
-much better libraries (Sklearn, etc..)
+much better libraries (Sklearn, etc..).
+
+The input data should be an X array with the shape n_features*n_samples and the
+input y in the format 1*n_samples
 
 * Tasks
 - [X] The fit method
