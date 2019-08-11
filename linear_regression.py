@@ -13,9 +13,9 @@ class LinearRegression:
     """
 
     def __init__(self, X_train, y ):
-        """
+        """ 
         X_train -> n_samples * n_features
-        y -> n_samples
+        y -> n_samples 
         """
         self.coeficients = None
         self.r2 = None
@@ -50,6 +50,8 @@ class LinearRegression:
         coefs = np.matmul(invXTX_XT, self.y.T).flatten()
         self.coefs = coefs
         self._polyfit = np.poly1d(coefs)
+        self.score(self.X_train)
+
 
     def score(self, X_test):
         """ Scores the obtained on the provided test set. Uses R squared."""
@@ -58,12 +60,8 @@ class LinearRegression:
         assert self.coefs is not None, "Run the fit method first."
         assert X_test.shape == self.X_train.shape, "Method do not have the same shape"
 
-        # Convert array to 2D, if it is only 1D.
-        if X_test.ndim > 1:
-            X_test = X_test.T
-
         # Evaluate the X_test points
-        self.prediction = np.apply_along_axis(self._polyfit, axis=0, arr=X_test)
+        self.prediction = np.apply_along_axis(self._polyfit, axis=1, arr=X_test)
 
         self.rss = np.square(self.y - self.prediction).sum()
         self.tss = np.square(self.y - self.y.mean()).sum()
@@ -72,8 +70,9 @@ class LinearRegression:
     def regression_analysis(self):
         """ Uses statsmodels to print the analysis of the regression variables"""
 
-        X = sm.add_constant(self.X_train)
-        mod = sm.OLS(self.y, X)
+        X = sm.add_constant(self.X_train.T)
+        print(X.shape, self.y.shape)
+        mod = sm.OLS(self.y.T, X)
         res = mod.fit()
         print(res.summary())
 
@@ -112,9 +111,6 @@ if (__name__ == "__main__"):
     y = df["sales"].values
     y = y.reshape(1, y.shape[0])
 
-
     lr = LinearRegression(X, y)
     lr.fit()
-    # print(lr.coefs)
-    # lr.score(X)
-    # print(lr.r2)
+    lr.regression_analysis()
