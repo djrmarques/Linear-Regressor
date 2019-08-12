@@ -44,35 +44,36 @@ class LinearRegression:
             inv_XT_X = np.linalg.inv(XT_X)
 
         invXTX_XT = np.matmul(inv_XT_X, X_train)
-
-        # Save the coeficients
         coefs = np.matmul(invXTX_XT, self.y.T).flatten()
-        self.coefs = coefs
-        self._polyfit = np.poly1d(coefs)
-        self.score(self.X_train)
+
+        # Save the coeficients and calculate the score
+        self.coefs = np.reshape(coefs, (-1, 1))
+        self.score()
 
 
-    def score(self, X_test):
+    def score(self):
         """ Scores the obtained on the provided test set. Uses R squared."""
 
         # Initial assertions
         assert self.coefs is not None, "Run the fit method first."
-        assert X_test.shape == self.X_train.shape, "Method do not have the same shape"
+        X_train = np.concatenate((np.ones((1, self.X_train.shape[1])), self.X_train), axis=0)
 
         # Evaluate the X_test points
-        self.prediction = np.apply_along_axis(self._polyfit, axis=1, arr=X_test)
+        self.prediction = np.sum(X_train * self.coefs, axis=0)
 
         self.rss = np.square(self.y - self.prediction).sum()
         self.tss = np.square(self.y - self.y.mean()).sum()
-        self.r2 = 1 - self.rss/self.tss
+        self.r2 = 1 - (self.rss/self.tss)
+        assert 0 <= self.r2 <= 1, f"R2 square must be between 0 and 1 not {self.r2}"
+        print(f"R2 square: {self.r2}")
 
     def regression_analysis(self):
         """ Uses statsmodels to print the analysis of the regression variables"""
 
         X = sm.add_constant(self.X_train.T)
         mod = sm.OLS(self.y.T, X)
-        res = mod.fit()
-        print(res.summary())
+        self.res = mod.fit()
+        print(self.res.summary())
 
     def select_features(self):
         """ Performs feature selection """
@@ -106,8 +107,8 @@ if (__name__ == "__main__"):
     df = pd.read_csv(datapath, index_col=0)
 
     X = df.drop("sales", axis=1).values.T
+    # X = df["TV"].values.reshape(1, -1)
     y = df["sales"].values
     y = y.reshape(1, y.shape[0])
-
     lr = LinearRegression(X, y)
     lr.fit()
