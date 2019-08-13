@@ -78,9 +78,29 @@ class LinearRegression:
     def select_features(self):
         """ Performs feature selection """
 
-        n_features = 0
-        total_features = 0
+        original_X = self.X_train.copy()
+        n_features = self.X_train.shape[0]
+        features_list = list(range(n_features))
+        current_features = list()
         best_r2 = 0
+        self.X_train = None
+
+        while features_list:
+            best_feature = None
+            for feature in features_list:
+                if not self.X_train:
+                    self.X_train = original_X[:, feature].reshape(1, -1)
+                else:
+                    self.X_train[:, -1] = original_X[:, feature]
+                self.fit()
+                if self.r2 > best_r2:
+                    best_r2 = self.r2
+                    best_feature = feature
+
+            if best_feature:
+                self.X_train = original_X[:, feature]
+
+            del features_list[best_feature]
 
     @staticmethod
     def _inputs_check(X_train, y):
@@ -111,4 +131,4 @@ if (__name__ == "__main__"):
     y = df["sales"].values
     y = y.reshape(1, y.shape[0])
     lr = LinearRegression(X, y)
-    lr.fit()
+    lr.select_features()
